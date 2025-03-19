@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -30,9 +31,7 @@ const formSchema = z.object({
     required_error: 'End date is required',
   }),
   registration_deadline: z.date().optional(),
-  max_team_size: z.string().transform(val => parseInt(val) || 4).pipe(
-    z.number().min(1).max(10)
-  ),
+  max_team_size: z.coerce.number().int().min(1).max(10),
   cover_image: z.string().optional(),
 });
 
@@ -49,7 +48,7 @@ const CreateEvent = () => {
       title: '',
       description: '',
       slug: '',
-      max_team_size: '4',
+      max_team_size: 4,
       cover_image: '',
     },
   });
@@ -340,7 +339,17 @@ const CreateEvent = () => {
                         <FormItem>
                           <FormLabel>Maximum Team Size</FormLabel>
                           <FormControl>
-                            <Input type="number" min="1" max="10" {...field} />
+                            <Input 
+                              type="number" 
+                              min="1" 
+                              max="10" 
+                              {...field}
+                              onChange={(e) => {
+                                const value = parseInt(e.target.value) || 4;
+                                field.onChange(value);
+                              }}
+                              value={field.value}
+                            />
                           </FormControl>
                           <FormDescription>
                             The maximum number of participants allowed in a team.
