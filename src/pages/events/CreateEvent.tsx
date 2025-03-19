@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -31,7 +30,9 @@ const formSchema = z.object({
     required_error: 'End date is required',
   }),
   registration_deadline: z.date().optional(),
-  max_team_size: z.string().transform(val => parseInt(val) || 4),
+  max_team_size: z.string().transform(val => parseInt(val) || 4).pipe(
+    z.number().min(1).max(10)
+  ),
   cover_image: z.string().optional(),
 });
 
@@ -108,7 +109,6 @@ const CreateEvent = () => {
     }
   };
 
-  // Auto-generate slug from title
   const updateSlug = () => {
     const title = form.watch('title');
     if (title) {
