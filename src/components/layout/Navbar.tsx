@@ -1,122 +1,184 @@
 
+// This file is automatically updated to include login functionality
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { useMobile } from '@/hooks/use-mobile';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/CustomButton';
-import { cn } from '@/lib/utils';
 
 export const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useMobile();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
+  // Close mobile menu when resizing to desktop
   useEffect(() => {
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > 10;
-      if (isScrolled !== scrolled) {
-        setScrolled(isScrolled);
-      }
-    };
+    if (!isMobile) {
+      setIsOpen(false);
+    }
+  }, [isMobile]);
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+  // Close mobile menu when navigating
+  useEffect(() => {
+    setIsOpen(false);
+  }, [navigate]);
 
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [scrolled]);
+  const toggleMenu = () => setIsOpen(!isOpen);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const closeMenu = () => setIsMenuOpen(false);
-
-  const navLinks = [
-    { name: 'Features', href: '#features' },
-    { name: 'Events', href: '#events' },
-    { name: 'Jobs', href: '#jobs' },
-    { name: 'About', href: '#about' },
-  ];
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase();
+  };
 
   return (
-    <nav 
-      className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out',
-        scrolled ? 'py-3 bg-white/80 backdrop-blur-lg shadow-sm' : 'py-5 bg-transparent'
-      )}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="bg-background border-b border-border/40">
+      <div className="section-container py-4">
         <div className="flex items-center justify-between">
-          {/* Logo and brand name */}
-          <Link 
-            to="/" 
-            className="flex items-center gap-2 text-xl font-bold text-foreground"
-            onClick={closeMenu}
-          >
-            <span className="bg-primary text-white px-2 py-1 rounded-md">D</span>
-            <span>Devnovate</span>
+          <Link to="/" className="text-2xl font-bold">
+            Devnovate
           </Link>
 
-          {/* Desktop navigation */}
-          <ul className="hidden md:flex md:items-center md:space-x-8">
-            {navLinks.map((link) => (
-              <li key={link.name}>
-                <a 
-                  href={link.href}
-                  className="text-foreground/80 hover:text-foreground transition-colors text-sm font-medium"
-                >
-                  {link.name}
-                </a>
-              </li>
-            ))}
-          </ul>
-
-          {/* CTA buttons */}
-          <div className="hidden md:flex md:items-center md:space-x-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/login">Login</Link>
-            </Button>
-            <Button variant="primary" size="sm" asChild>
-              <Link to="/register">Register</Link>
-            </Button>
-          </div>
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-6">
+            <Link to="/features" className="text-foreground/80 hover:text-foreground transition-colors">
+              Features
+            </Link>
+            
+            {user ? (
+              <>
+                <Link to="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">
+                  Dashboard
+                </Link>
+                <Link to="/events" className="text-foreground/80 hover:text-foreground transition-colors">
+                  Events
+                </Link>
+                <Link to="/teams" className="text-foreground/80 hover:text-foreground transition-colors">
+                  Teams
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/#features" className="text-foreground/80 hover:text-foreground transition-colors">
+                  How It Works
+                </Link>
+                <Link to="/#showcase" className="text-foreground/80 hover:text-foreground transition-colors">
+                  Showcase
+                </Link>
+              </>
+            )}
+            
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Avatar className="cursor-pointer">
+                    <AvatarImage src={user.user_metadata?.avatar_url} />
+                    <AvatarFallback>
+                      {user.user_metadata?.full_name 
+                        ? getInitials(user.user_metadata.full_name) 
+                        : user.email?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => navigate('/auth/login')}>
+                  Sign In
+                </Button>
+                <Button onClick={() => navigate('/auth/signup')}>
+                  Sign Up
+                </Button>
+              </div>
+            )}
+          </nav>
 
           {/* Mobile menu button */}
-          <button 
-            type="button"
-            className="md:hidden rounded-md p-2 text-foreground"
+          <button
             onClick={toggleMenu}
-            aria-expanded={isMenuOpen}
+            className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-foreground"
+            aria-expanded={isOpen}
           >
             <span className="sr-only">Open main menu</span>
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
-      </div>
 
-      {/* Mobile menu */}
-      <div 
-        className={cn(
-          'md:hidden absolute top-full left-0 right-0 overflow-hidden bg-white/95 backdrop-blur-lg transition-all duration-300 ease-in-out border-b',
-          isMenuOpen ? 'max-h-96 border-border' : 'max-h-0 border-transparent'
-        )}
-      >
-        <div className="px-4 py-4 space-y-1">
-          {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              className="block px-3 py-3 text-foreground font-medium rounded-md hover:bg-muted transition-colors"
-              onClick={closeMenu}
-            >
-              {link.name}
-            </a>
-          ))}
-          <div className="grid grid-cols-2 gap-3 pt-2 pb-3">
-            <Button variant="ghost" size="sm" className="w-full" asChild>
-              <Link to="/login" onClick={closeMenu}>Login</Link>
-            </Button>
-            <Button variant="primary" size="sm" className="w-full" asChild>
-              <Link to="/register" onClick={closeMenu}>Register</Link>
-            </Button>
+        {/* Mobile menu, show/hide based on menu state */}
+        {isOpen && (
+          <div className="md:hidden py-4">
+            <div className="flex flex-col gap-4 items-center">
+              <Link to="/features" className="text-foreground/80 hover:text-foreground transition-colors">
+                Features
+              </Link>
+              
+              {user ? (
+                <>
+                  <Link to="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">
+                    Dashboard
+                  </Link>
+                  <Link to="/events" className="text-foreground/80 hover:text-foreground transition-colors">
+                    Events
+                  </Link>
+                  <Link to="/teams" className="text-foreground/80 hover:text-foreground transition-colors">
+                    Teams
+                  </Link>
+                  <Button variant="outline" onClick={() => signOut()} className="w-full">
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/#features" className="text-foreground/80 hover:text-foreground transition-colors">
+                    How It Works
+                  </Link>
+                  <Link to="/#showcase" className="text-foreground/80 hover:text-foreground transition-colors">
+                    Showcase
+                  </Link>
+                  <div className="flex gap-2 w-full">
+                    <Button variant="outline" onClick={() => navigate('/auth/login')} className="flex-1">
+                      Sign In
+                    </Button>
+                    <Button onClick={() => navigate('/auth/signup')} className="flex-1">
+                      Sign Up
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
-    </nav>
+    </header>
   );
 };
