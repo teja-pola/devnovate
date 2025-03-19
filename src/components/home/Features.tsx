@@ -8,6 +8,9 @@ import {
   BarChart3 
 } from 'lucide-react';
 import { FadeIn } from '@/components/animations/FadeIn';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/CustomButton';
+import { ArrowRight } from 'lucide-react';
 
 const features = [
   {
@@ -66,6 +69,18 @@ export const Features = () => {
             </FadeIn>
           ))}
         </div>
+        
+        <FadeIn className="mt-12 text-center">
+          <Button 
+            variant="outline" 
+            size="lg" 
+            icon={<ArrowRight className="h-4 w-4" />}
+            iconPosition="right"
+            asChild
+          >
+            <Link to="/features">Explore All Features</Link>
+          </Button>
+        </FadeIn>
       </div>
     </section>
   );
