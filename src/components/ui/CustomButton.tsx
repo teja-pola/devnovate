@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Button as ShadcnButton, buttonVariants } from './button';
+import { Button as ShadcnButton, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { ButtonProps as ShadcnButtonProps } from './button';
+import type { ButtonProps as ShadcnButtonProps } from '@/components/ui/button';
 import { Slot } from '@radix-ui/react-slot';
 
 // Create a new interface for our custom button that properly extends ShadcnButtonProps
