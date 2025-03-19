@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils';
 import type { ButtonProps as ShadcnButtonProps } from '@/components/ui/button';
 import { Slot } from '@radix-ui/react-slot';
 
-interface ButtonProps extends Omit<ShadcnButtonProps, 'asChild'> {
+// Create a new interface for our custom button that properly extends ShadcnButtonProps
+interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'size'> {
   children: React.ReactNode;
   variant?: 'default' | 'outline' | 'ghost' | 'link' | 'primary' | 'secondary';
   size?: 'default' | 'sm' | 'lg' | 'icon';
@@ -23,13 +24,16 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
     };
     
-    // When asChild is true, we need to use Slot and pass className directly
+    // Map our custom variants to ones that exist in shadcn/ui
+    const mappedVariant = variant === 'primary' || variant === 'secondary' ? 'default' : variant;
+    
+    // When asChild is true, we need to use Slot
     if (asChild) {
       return (
         <Slot 
-          ref={ref}
+          ref={ref as React.Ref<HTMLElement>}
           className={cn(
-            buttonVariants({ variant: ['primary', 'secondary'].includes(variant) ? 'default' : variant, size }),
+            buttonVariants({ variant: mappedVariant, size }),
             variant === 'primary' && variantClasses.primary,
             variant === 'secondary' && variantClasses.secondary,
             'relative overflow-hidden transition-all duration-300 ease-out active:scale-[0.98]',
@@ -86,7 +90,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         ref={ref}
         size={size}
-        variant={['primary', 'secondary'].includes(variant) ? 'default' : variant}
+        variant={mappedVariant}
         {...props}
       >
         <span className="relative z-10 flex items-center justify-center gap-2">
