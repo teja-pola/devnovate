@@ -1,10 +1,9 @@
-
 import { Link } from 'react-router-dom';
-import { FadeIn } from '@/components/animations/FadeIn';
+import { FadeIn } from '../animations/FadeIn';
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
-  
+
   const footerLinks = {
     product: [
       { name: 'Features', href: '#features' },
@@ -29,13 +28,14 @@ export const Footer = () => {
       { name: 'Terms', href: '#terms' },
       { name: 'Cookie Policy', href: '#cookies' },
     ],
-  };
+  }
+
 
   return (
     <footer className="bg-secondary/50 border-t">
       <FadeIn>
         <div className="section-container">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pt-8 pb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pt-4 pb-8"> {/* Updated padding */}
             {/* Brand */}
             <div className="lg:col-span-2">
               <Link to="/" className="flex items-center gap-2 text-xl font-bold text-foreground mb-4">
@@ -53,7 +53,7 @@ export const Footer = () => {
               <ul className="space-y-3">
                 {footerLinks.product.map((link) => (
                   <li key={link.name}>
-                    <a 
+                    <a
                       href={link.href}
                       className="text-muted-foreground hover:text-foreground transition-colors text-sm"
                     >
@@ -69,7 +69,7 @@ export const Footer = () => {
               <ul className="space-y-3">
                 {footerLinks.company.map((link) => (
                   <li key={link.name}>
-                    <a 
+                    <a
                       href={link.href}
                       className="text-muted-foreground hover:text-foreground transition-colors text-sm"
                     >
@@ -85,7 +85,7 @@ export const Footer = () => {
               <ul className="space-y-3">
                 {[...footerLinks.resources, ...footerLinks.legal].map((link) => (
                   <li key={link.name}>
-                    <a 
+                    <a
                       href={link.href}
                       className="text-muted-foreground hover:text-foreground transition-colors text-sm"
                     >
@@ -121,10 +121,10 @@ export const Footer = () => {
                   <path fillRule="evenodd" d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z" clipRule="evenodd" />
                 </svg>
               </a>
-            </div>
-          </div>
-        </div>
-      </FadeIn>
+            </div> {/* Closing div for the grid */}
+          </div> {/* Closing div for the section container */}
+        </div> {/* Closing div for the section-container */}
+      </FadeIn> {/* Closing FadeIn */}
     </footer>
-  );
-};
+  )
+}

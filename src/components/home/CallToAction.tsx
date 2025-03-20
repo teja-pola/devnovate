@@ -13,11 +13,9 @@ export const CallToAction = () => {
       <div className="section-container">
         <div className="max-w-4xl mx-auto text-center">
           <FadeIn>
-            <h2 className="heading-lg mb-6">Ready to Innovate and Connect?</h2>
+            <h2 className="heading-lg mb-6">Connecting Skills with Opportunities.</h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Join thousands of innovators, creators, and recruiters on Devnovate. 
-              Host events, build your team, showcase your skills, and find opportunities that match your passion.
-            </p>
+            Join a network of job seekers, employers, and recruiters on Devnovate. Connect, grow, and find the right opportunities to build your future.</p>
             
             <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
               <Button 
@@ -27,20 +25,19 @@ export const CallToAction = () => {
                 iconPosition="right"
                 asChild
               >
-                <Link to="/register">Get Started Free</Link>
+                <Link to="/register">Post Job</Link>
               </Button>
               <Button 
                 variant="outline" 
                 size="lg" 
                 asChild
               >
-                <Link to="/contact">Contact Sales</Link>
+                <Link to="/contact">Explore Opportunities</Link>
               </Button>
             </div>
             
             <p className="text-sm text-muted-foreground">
-              No credit card required. Free plan includes up to 100 participants per event.
-            </p>
+            Your dream job awaits! 🚀💼 Take the leap and make it yours. 🌟</p>
           </FadeIn>
         </div>
       </div>
