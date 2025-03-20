@@ -2,103 +2,73 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { supabaseExtended } from '@/integrations/supabase/extendedClient';
+import { toast } from 'sonner';
 
-interface Event {
-  id: string;
-  title: string;
-}
-
-export function useEventData(userId: string | undefined) {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [participatingEvents, setParticipatingEvents] = useState<Event[]>([]);
+export const useEventData = (userId?: string) => {
+  const [participatingEvents, setParticipatingEvents] = useState<any[]>([]);
+  const [hostedEvents, setHostedEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [eventsLoading, setEventsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      setLoading(true);
-      
-      if (!userId) return;
-      
+    if (!userId) {
+      setLoading(false);
+      setEventsLoading(false);
+      return;
+    }
+
+    const fetchEventData = async () => {
       try {
+        setLoading(true);
+        
+        // Fetch hosted events (events created by user)
+        const { data: createdEvents, error: hostedError } = await supabase
+          .from('events')
+          .select('*')
+          .eq('creator_id', userId)
+          .order('created_at', { ascending: false });
+          
+        if (hostedError) throw hostedError;
+        setHostedEvents(createdEvents || []);
+        
+        // Fetch events the user is participating in
         const { data: registrations, error: regError } = await supabaseExtended
           .from('event_registrations')
           .select('event_id')
           .eq('user_id', userId);
           
-        if (regError) {
-          console.error('Error fetching registrations:', regError);
-          setLoading(false);
-          return;
-        }
-        
-        if (!registrations || registrations.length === 0) {
-          setLoading(false);
-          return;
-        }
-        
-        const eventIds = registrations.map(reg => reg.event_id);
-        
-        const { data: eventData, error: eventError } = await supabase
-          .from('events')
-          .select('id, title')
-          .in('id', eventIds)
-          .eq('status', 'published')
-          .gte('end_date', new Date().toISOString());
-        
-        if (eventError) {
-          console.error('Error fetching events:', eventError);
-          setLoading(false);
-          return;
-        }
-        
-        setEvents(eventData || []);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error in fetchEvents:', error);
-        setLoading(false);
-      }
-    };
-    
-    if (userId) {
-      fetchEvents();
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    const fetchParticipatingEvents = async () => {
-      if (!userId) return;
-      
-      try {
-        setEventsLoading(true);
-        
-        const { data: registrations } = await supabaseExtended
-          .from('event_registrations')
-          .select('event_id')
-          .eq('user_id', userId);
+        if (regError) throw regError;
         
         if (registrations && registrations.length > 0) {
           const eventIds = registrations.map(reg => reg.event_id);
           
-          const { data: events } = await supabase
+          const { data: participatingEventData, error: eventsError } = await supabase
             .from('events')
             .select('*')
             .in('id', eventIds)
-            .order('start_date', { ascending: false });
-          
-          setParticipatingEvents(events || []);
+            .order('start_date', { ascending: true });
+            
+          if (eventsError) throw eventsError;
+          setParticipatingEvents(participatingEventData || []);
+        } else {
+          setParticipatingEvents([]);
         }
       } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error('Error fetching event data:', error);
+        toast.error('Failed to load event data');
       } finally {
+        setLoading(false);
         setEventsLoading(false);
       }
     };
     
-    if (userId) {
-      fetchParticipatingEvents();
-    }
+    fetchEventData();
   }, [userId]);
 
-  return { events, participatingEvents, loading, eventsLoading };
-}
+  return { 
+    participatingEvents, 
+    hostedEvents, 
+    loading, 
+    eventsLoading 
+  };
+};

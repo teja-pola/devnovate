@@ -1,190 +1,177 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { supabase } from '@/integrations/supabase/client';
 
-const formSchema = z.object({
-  name: z.string().min(3, 'Team name must be at least 3 characters'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  event_id: z.string().min(1, 'Event is required'),
-  looking_for_members: z.boolean().default(true),
-});
-
-export type FormValues = z.infer<typeof formSchema>;
-
-interface TeamFormProps {
-  defaultEventId?: string | null;
-  events: Array<{ id: string; title: string }>;
+export const TeamForm = ({ 
+  defaultEventId, 
+  events, 
+  userId 
+}: { 
+  defaultEventId: string | null; 
+  events: any[]; 
   userId: string;
-}
-
-export const TeamForm = ({ defaultEventId, events, userId }: TeamFormProps) => {
+}) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      description: '',
-      event_id: defaultEventId || '',
-      looking_for_members: true,
-    },
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    eventId: defaultEventId || '',
+    lookingForMembers: true
   });
 
-  const onSubmit = async (values: FormValues) => {
-    if (!userId) {
-      toast.error('You must be logged in to create a team');
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (value: string) => {
+    setFormData(prev => ({ ...prev, eventId: value }));
+  };
+
+  const handleCheckboxChange = (checked: boolean) => {
+    setFormData(prev => ({ ...prev, lookingForMembers: checked }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name.trim()) {
+      toast.error('Team name is required');
+      return;
+    }
+
+    if (!formData.eventId) {
+      toast.error('Please select an event');
       return;
     }
 
     setIsSubmitting(true);
+
     try {
-      const { data: teamData, error: teamError } = await supabase
+      // Create the team
+      const { data: team, error: teamError } = await supabase
         .from('teams')
         .insert({
-          name: values.name,
-          description: values.description,
-          event_id: values.event_id,
-          looking_for_members: values.looking_for_members,
+          name: formData.name,
+          description: formData.description,
+          event_id: formData.eventId,
+          looking_for_members: formData.lookingForMembers
         })
         .select()
         .single();
 
       if (teamError) throw teamError;
-      
+
+      // Add the creator as a team member with 'leader' role
       const { error: memberError } = await supabase
         .from('team_members')
         .insert({
-          team_id: teamData.id,
+          team_id: team.id,
           user_id: userId,
-          role: 'leader',
+          role: 'leader'
         });
 
       if (memberError) throw memberError;
 
-      toast.success('Team created successfully');
-      navigate(`/teams/${teamData.id}`);
-    } catch (error: any) {
+      toast.success('Team created successfully!');
+      navigate('/dashboard');
+    } catch (error) {
       console.error('Error creating team:', error);
-      toast.error(error.message || 'Failed to create team');
+      toast.error('Failed to create team');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Team Name</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g. Code Ninjas" {...field} />
-              </FormControl>
-              <FormDescription>
-                Choose a creative and unique name for your team.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <Card>
+      <CardContent className="pt-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="eventId">Select Event</Label>
+            <Select
+              value={formData.eventId}
+              onValueChange={handleSelectChange}
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select an event" />
+              </SelectTrigger>
+              <SelectContent>
+                {events.map(event => (
+                  <SelectItem key={event.id} value={event.id}>
+                    {event.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Team Description</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Describe your team, your skills, and what you're looking for in teammates..." 
-                  className="min-h-32" 
-                  {...field} 
-                />
-              </FormControl>
-              <FormDescription>
-                Tell others about your team's strengths, goals, and the skills you're looking for.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <div className="space-y-2">
+            <Label htmlFor="name">Team Name</Label>
+            <Input
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter team name"
+              required
+            />
+          </div>
 
-        <FormField
-          control={form.control}
-          name="event_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Event</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an event" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {events.map((event) => (
-                    <SelectItem key={event.id} value={event.id}>
-                      {event.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                The event this team is participating in.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <div className="space-y-2">
+            <Label htmlFor="description">Team Description</Label>
+            <Textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Describe your team, skills needed, etc."
+              rows={4}
+            />
+          </div>
 
-        <FormField
-          control={form.control}
-          name="looking_for_members"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Looking for Members</FormLabel>
-                <FormDescription>
-                  Allow others to request to join your team.
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="lookingForMembers" 
+              checked={formData.lookingForMembers}
+              onCheckedChange={handleCheckboxChange}
+            />
+            <Label htmlFor="lookingForMembers">We're looking for more team members</Label>
+          </div>
 
-        <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={() => navigate('/teams')}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating...' : 'Create Team'}
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <div className="flex justify-end space-x-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate('/dashboard')}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating...' : 'Create Team'}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
