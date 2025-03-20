@@ -1,12 +1,12 @@
-
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/CustomButton';
-import { FadeIn } from '@/components/animations/FadeIn';
+import { Button } from '../ui/CustomButton'; // Adjusted path
+import { FadeIn } from '../animations/FadeIn'; // Adjusted path
+
 
 export const Hero = () => {
   return (
-    <section className="relative overflow-hidden pt-28 pb-20 md:pt-36 md:pb-32">
+    <section className="relative overflow-hidden pt-10 pb-10 md:pt-6 md:pb-12"> {/* Updated padding */}
       {/* Background decorations */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/4 w-[800px] h-[800px] rounded-full bg-primary/5 blur-3xl" />
@@ -42,35 +42,34 @@ export const Hero = () => {
                 iconPosition="right"
                 asChild
               >
-                <Link to="/register">Get Started Free</Link>
+                <Link to="/register">Host Event</Link>
               </Button>
               <Button 
                 variant="outline" 
                 size="lg" 
                 asChild
               >
-                <a href="#features">Learn More</a>
+                <a href="#features">Browse Events</a>
               </Button>
             </div>
           </FadeIn>
           
           <FadeIn delay={0.5}>
-            <div className="relative mx-auto max-w-5xl rounded-xl overflow-hidden shadow-2xl">
-              <div className="bg-secondary/50 absolute inset-0 z-10 backdrop-blur-md flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
-                <Button variant="primary" size="lg">
-                  Watch Demo
-                </Button>
-              </div>
-              
-              <img 
-                src="https://placehold.co/1200x675/f8fafc/cbd5e1?text=Devnovate+Platform+Demo&font=playfair-display" 
-                alt="Devnovate Platform Screenshot" 
-                className="w-full h-auto object-cover transition-transform duration-700 hover:scale-105"
-              />
+            <div className="relative mx-auto max-w-7xl">
+              <iframe
+                width="100%"
+                height="500" // Explicitly set the height to make it a large rectangle
+                src="https://www.youtube.com/embed/P41fbQyzHy0"
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="rounded-lg shadow-lg"
+              ></iframe>
             </div>
           </FadeIn>
-          
-          <FadeIn delay={0.6} className="mt-10">
+
+          <FadeIn delay={0.6} className="mt-10 ">
             <p className="text-sm text-muted-foreground mb-4">
               Trusted by leading organizations worldwide
             </p>

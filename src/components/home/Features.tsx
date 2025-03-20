@@ -47,7 +47,7 @@ const features = [
 
 export const Features = () => {
   return (
-    <section id="features" className="py-20 bg-secondary/30">
+    <section id="features" className="py-20 pb-32 bg-secondary/30">
       <div className="section-container">
         <FadeIn className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="heading-lg mb-4">Powerful Features for Every Stage</h2>
