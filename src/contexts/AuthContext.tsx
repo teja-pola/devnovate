@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { supabaseExtended } from '@/integrations/supabase/extendedClient';
 import { toast } from 'sonner';
 
 type UserType = 'candidate' | 'recruiter';
@@ -38,7 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (session?.user) {
           // Fetch user type from profiles
-          const { data } = await supabase
+          const { data } = await supabaseExtended
             .from('profiles')
             .select('user_type')
             .eq('id', session.user.id)
@@ -60,7 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (session?.user) {
         // Fetch user type from profiles
-        const { data } = await supabase
+        const { data } = await supabaseExtended
           .from('profiles')
           .select('user_type')
           .eq('id', session.user.id)
@@ -108,7 +109,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Create a profile record
       if (data.user) {
-        const { error: profileError } = await supabase
+        const { error: profileError } = await supabaseExtended
           .from('profiles')
           .insert({
             id: data.user.id,

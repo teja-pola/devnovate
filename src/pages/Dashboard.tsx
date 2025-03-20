@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Users, Award, Calendar, Briefcase, CalendarDays, ExternalLink } from 'lucide-react';
 import { FadeIn } from '@/components/animations/FadeIn';
 import { supabase } from '@/integrations/supabase/client';
+import { supabaseExtended } from '@/integrations/supabase/extendedClient';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -49,7 +50,7 @@ const Dashboard = () => {
           setHostedEvents(createdEvents || []);
           
           // Fetch events the user is participating in
-          const { data: registrations } = await supabase
+          const { data: registrations } = await supabaseExtended
             .from('event_registrations')
             .select('event_id')
             .eq('user_id', user.id);

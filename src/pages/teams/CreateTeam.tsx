@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { supabase } from '@/integrations/supabase/client';
+import { supabaseExtended } from '@/integrations/supabase/extendedClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Navbar } from '@/components/layout/Navbar';
@@ -38,8 +38,9 @@ const CreateTeam = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // Get event_id from URL if provided
+  const [participatingEvents, setParticipatingEvents] = useState<Event[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+
   const searchParams = new URLSearchParams(location.search);
   const eventId = searchParams.get('event');
 
@@ -64,7 +65,6 @@ const CreateTeam = () => {
     const fetchEvents = async () => {
       setLoading(true);
       
-      // Fetch user's registered events
       const { data: registrations, error: regError } = await supabase
         .from('event_registrations')
         .select('event_id')
@@ -83,13 +83,12 @@ const CreateTeam = () => {
       
       const eventIds = registrations.map(reg => reg.event_id);
       
-      // Fetch event details
       const { data: eventData, error: eventError } = await supabase
         .from('events')
         .select('id, title')
         .in('id', eventIds)
         .eq('status', 'published')
-        .gte('end_date', new Date().toISOString()); // Only include ongoing or future events
+        .gte('end_date', new Date().toISOString());
       
       if (eventError) {
         console.error('Error fetching events:', eventError);
@@ -106,6 +105,42 @@ const CreateTeam = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    const fetchParticipatingEvents = async () => {
+      if (!user) return;
+      
+      try {
+        setEventsLoading(true);
+        
+        const { data: registrations } = await supabaseExtended
+          .from('event_registrations')
+          .select('event_id')
+          .eq('user_id', user.id);
+        
+        if (registrations && registrations.length > 0) {
+          const eventIds = registrations.map(reg => reg.event_id);
+          
+          const { data: events } = await supabase
+            .from('events')
+            .select('*')
+            .in('id', eventIds)
+            .order('start_date', { ascending: false });
+          
+          setParticipatingEvents(events || []);
+        }
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        toast.error('Failed to load events');
+      } finally {
+        setEventsLoading(false);
+      }
+    };
+    
+    if (user) {
+      fetchParticipatingEvents();
+    }
+  }, [user]);
+
   const onSubmit = async (values: FormValues) => {
     if (!user) {
       toast.error('You must be logged in to create a team');
@@ -114,7 +149,6 @@ const CreateTeam = () => {
 
     setIsSubmitting(true);
     try {
-      // Create new team
       const { data: teamData, error: teamError } = await supabase
         .from('teams')
         .insert({
@@ -128,7 +162,6 @@ const CreateTeam = () => {
 
       if (teamError) throw teamError;
       
-      // Add creator as team member with role "leader"
       const { error: memberError } = await supabase
         .from('team_members')
         .insert({
@@ -149,7 +182,7 @@ const CreateTeam = () => {
     }
   };
 
-  if (authLoading || loading) {
+  if (authLoading || loading || eventsLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
@@ -173,7 +206,7 @@ const CreateTeam = () => {
                   Form a team to participate in hackathons and coding events.
                 </p>
 
-                {events.length === 0 ? (
+                {participatingEvents.length === 0 ? (
                   <div className="bg-muted p-6 rounded-lg text-center">
                     <h3 className="text-xl font-semibold mb-2">No Eligible Events</h3>
                     <p className="text-muted-foreground mb-4">
@@ -240,7 +273,7 @@ const CreateTeam = () => {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {events.map((event) => (
+                                {participatingEvents.map((event) => (
                                   <SelectItem key={event.id} value={event.id}>
                                     {event.title}
                                   </SelectItem>
