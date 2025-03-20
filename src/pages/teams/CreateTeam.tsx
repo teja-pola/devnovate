@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -65,39 +66,46 @@ const CreateTeam = () => {
     const fetchEvents = async () => {
       setLoading(true);
       
-      const { data: registrations, error: regError } = await supabase
-        .from('event_registrations')
-        .select('event_id')
-        .eq('user_id', user?.id);
+      if (!user) return;
+      
+      try {
+        const { data: registrations, error: regError } = await supabaseExtended
+          .from('event_registrations')
+          .select('event_id')
+          .eq('user_id', user.id);
+          
+        if (regError) {
+          console.error('Error fetching registrations:', regError);
+          setLoading(false);
+          return;
+        }
         
-      if (regError) {
-        console.error('Error fetching registrations:', regError);
+        if (!registrations || registrations.length === 0) {
+          setLoading(false);
+          return;
+        }
+        
+        const eventIds = registrations.map(reg => reg.event_id);
+        
+        const { data: eventData, error: eventError } = await supabase
+          .from('events')
+          .select('id, title')
+          .in('id', eventIds)
+          .eq('status', 'published')
+          .gte('end_date', new Date().toISOString());
+        
+        if (eventError) {
+          console.error('Error fetching events:', eventError);
+          setLoading(false);
+          return;
+        }
+        
+        setEvents(eventData || []);
         setLoading(false);
-        return;
-      }
-      
-      if (!registrations || registrations.length === 0) {
+      } catch (error) {
+        console.error('Error in fetchEvents:', error);
         setLoading(false);
-        return;
       }
-      
-      const eventIds = registrations.map(reg => reg.event_id);
-      
-      const { data: eventData, error: eventError } = await supabase
-        .from('events')
-        .select('id, title')
-        .in('id', eventIds)
-        .eq('status', 'published')
-        .gte('end_date', new Date().toISOString());
-      
-      if (eventError) {
-        console.error('Error fetching events:', eventError);
-        setLoading(false);
-        return;
-      }
-      
-      setEvents(eventData || []);
-      setLoading(false);
     };
     
     if (user) {
