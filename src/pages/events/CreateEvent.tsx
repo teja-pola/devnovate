@@ -1,9 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import ThemeToggle from '@/components/ui/ThemeToggle'; // Import the ThemeToggle component
 
 import { Navbar } from '@/components/layout/Navbar'; // Corrected import statement
-
 
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -14,21 +12,38 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 import { Footer } from '@/components/layout/Footer';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { FadeIn } from '@/components/animations/FadeIn';
 
 const formSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  slug: z.string().min(3, 'Slug must be at least 3 characters')
-    .regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens'),
+  slug: z
+    .string()
+    .min(3, 'Slug must be at least 3 characters')
+    .regex(
+      /^[a-z0-9-]+$/,
+      'Slug can only contain lowercase letters, numbers, and hyphens'
+    ),
   start_date: z.date({
     required_error: 'Start date is required',
   }),
@@ -64,8 +79,8 @@ const CreateEvent = () => {
     }
   }, [user, loading, navigate]);
 
-    const onSubmit = async (values: FormValues) => {
-        console.log('User ID:', user.id); // Log the user ID for debugging
+  const onSubmit = async (values: FormValues) => {
+    console.log('User ID:', user.id); // Log the user ID for debugging
 
     if (!user) {
       toast.error('You must be logged in to create an event');
@@ -74,7 +89,33 @@ const CreateEvent = () => {
 
     setIsSubmitting(true);
     try {
-      // Check if slug is unique
+      const { data: userExists, error: userCheckError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+      if (userCheckError || !userExists) {
+        console.log('User not found in users table, creating it now');
+
+        const { data: authUser, error: authError } =
+          await supabase.auth.getUser();
+
+        if (authError) throw authError;
+
+        const { error: createUserError } = await supabase.from('users').insert({
+          id: user.id,
+          full_name: authUser.user?.user_metadata?.full_name || 'User',
+        });
+
+        if (createUserError) {
+          console.error('Failed to create user record:', createUserError);
+          throw createUserError;
+        }
+
+        console.log('User record created successfully');
+      }
+
       const { data: existingEvent } = await supabase
         .from('events')
         .select('slug')
@@ -82,9 +123,9 @@ const CreateEvent = () => {
         .single();
 
       if (existingEvent) {
-        form.setError('slug', { 
-          type: 'manual', 
-          message: 'This slug is already taken. Please choose another one.' 
+        form.setError('slug', {
+          type: 'manual',
+          message: 'This slug is already taken. Please choose another one.',
         });
         setIsSubmitting(false);
         return;
@@ -118,7 +159,11 @@ const CreateEvent = () => {
   const updateSlug = () => {
     const title = form.watch('title');
     if (title) {
-      const slug = title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      const slug = title
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
       form.setValue('slug', slug);
     }
   };
@@ -144,11 +189,15 @@ const CreateEvent = () => {
               <div className="max-w-3xl mx-auto">
                 <h1 className="text-4xl font-bold mb-6">Create a New Event</h1>
                 <p className="text-lg text-muted-foreground mb-8">
-                  Fill in the details below to create your hackathon or coding event.
+                  Fill in the details below to create your hackathon or coding
+                  event.
                 </p>
 
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-8"
+                  >
                     <FormField
                       control={form.control}
                       name="title"
@@ -156,17 +205,18 @@ const CreateEvent = () => {
                         <FormItem>
                           <FormLabel>Event Title</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="e.g. Summer Hackathon 2024" 
-                              {...field} 
-                              onChange={(e) => {
+                            <Input
+                              placeholder="e.g. Summer Hackathon 2024"
+                              {...field}
+                              onChange={e => {
                                 field.onChange(e);
                                 updateSlug();
                               }}
                             />
                           </FormControl>
                           <FormDescription>
-                            The name of your event as it will appear to participants.
+                            The name of your event as it will appear to
+                            participants.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -180,10 +230,14 @@ const CreateEvent = () => {
                         <FormItem>
                           <FormLabel>Event Slug</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. summer-hackathon-2024" {...field} />
+                            <Input
+                              placeholder="e.g. summer-hackathon-2024"
+                              {...field}
+                            />
                           </FormControl>
                           <FormDescription>
-                            The URL-friendly name for your event. Only lowercase letters, numbers, and hyphens.
+                            The URL-friendly name for your event. Only lowercase
+                            letters, numbers, and hyphens.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -197,14 +251,15 @@ const CreateEvent = () => {
                         <FormItem>
                           <FormLabel>Event Description</FormLabel>
                           <FormControl>
-                            <Textarea 
-                              placeholder="Describe your event, its goals, and what participants can expect..." 
-                              className="min-h-32" 
-                              {...field} 
+                            <Textarea
+                              placeholder="Describe your event, its goals, and what participants can expect..."
+                              className="min-h-32"
+                              {...field}
                             />
                           </FormControl>
                           <FormDescription>
-                            A detailed description of your event. Markdown is supported.
+                            A detailed description of your event. Markdown is
+                            supported.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -226,7 +281,7 @@ const CreateEvent = () => {
                                     className="w-full pl-3 text-left font-normal"
                                   >
                                     {field.value ? (
-                                      format(field.value, "PPP")
+                                      format(field.value, 'PPP')
                                     ) : (
                                       <span>Pick a date</span>
                                     )}
@@ -234,12 +289,15 @@ const CreateEvent = () => {
                                   </Button>
                                 </FormControl>
                               </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
+                              <PopoverContent
+                                className="w-auto p-0"
+                                align="start"
+                              >
                                 <Calendar
                                   mode="single"
                                   selected={field.value}
                                   onSelect={field.onChange}
-                                  disabled={(date) => date < new Date()}
+                                  disabled={date => date < new Date()}
                                   initialFocus
                                 />
                               </PopoverContent>
@@ -266,7 +324,7 @@ const CreateEvent = () => {
                                     className="w-full pl-3 text-left font-normal"
                                   >
                                     {field.value ? (
-                                      format(field.value, "PPP")
+                                      format(field.value, 'PPP')
                                     ) : (
                                       <span>Pick a date</span>
                                     )}
@@ -274,14 +332,18 @@ const CreateEvent = () => {
                                   </Button>
                                 </FormControl>
                               </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
+                              <PopoverContent
+                                className="w-auto p-0"
+                                align="start"
+                              >
                                 <Calendar
                                   mode="single"
                                   selected={field.value}
                                   onSelect={field.onChange}
-                                  disabled={(date) => 
-                                    date < new Date() || 
-                                    (form.watch('start_date') && date < form.watch('start_date'))
+                                  disabled={date =>
+                                    date < new Date() ||
+                                    (form.watch('start_date') &&
+                                      date < form.watch('start_date'))
                                   }
                                   initialFocus
                                 />
@@ -301,7 +363,9 @@ const CreateEvent = () => {
                       name="registration_deadline"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel>Registration Deadline (Optional)</FormLabel>
+                          <FormLabel>
+                            Registration Deadline (Optional)
+                          </FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
@@ -310,7 +374,7 @@ const CreateEvent = () => {
                                   className="w-full pl-3 text-left font-normal"
                                 >
                                   {field.value ? (
-                                    format(field.value, "PPP")
+                                    format(field.value, 'PPP')
                                   ) : (
                                     <span>Pick a date</span>
                                   )}
@@ -318,21 +382,26 @@ const CreateEvent = () => {
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
                               <Calendar
                                 mode="single"
                                 selected={field.value || undefined}
                                 onSelect={field.onChange}
-                                disabled={(date) => 
-                                  date < new Date() || 
-                                  (form.watch('start_date') && date > form.watch('start_date'))
+                                disabled={date =>
+                                  date < new Date() ||
+                                  (form.watch('start_date') &&
+                                    date > form.watch('start_date'))
                                 }
                                 initialFocus
                               />
                             </PopoverContent>
                           </Popover>
                           <FormDescription>
-                            The last date participants can register. If not set, registration will close when the event starts.
+                            The last date participants can register. If not set,
+                            registration will close when the event starts.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -346,12 +415,12 @@ const CreateEvent = () => {
                         <FormItem>
                           <FormLabel>Maximum Team Size</FormLabel>
                           <FormControl>
-                            <Input 
-                              type="number" 
-                              min="1" 
-                              max="10" 
+                            <Input
+                              type="number"
+                              min="1"
+                              max="10"
                               {...field}
-                              onChange={(e) => {
+                              onChange={e => {
                                 const value = parseInt(e.target.value) || 4;
                                 field.onChange(value);
                               }}
@@ -359,7 +428,8 @@ const CreateEvent = () => {
                             />
                           </FormControl>
                           <FormDescription>
-                            The maximum number of participants allowed in a team.
+                            The maximum number of participants allowed in a
+                            team.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -373,7 +443,10 @@ const CreateEvent = () => {
                         <FormItem>
                           <FormLabel>Cover Image URL (Optional)</FormLabel>
                           <FormControl>
-                            <Input placeholder="https://example.com/image.jpg" {...field} />
+                            <Input
+                              placeholder="https://example.com/image.jpg"
+                              {...field}
+                            />
                           </FormControl>
                           <FormDescription>
                             A URL to an image that represents your event.
@@ -384,7 +457,11 @@ const CreateEvent = () => {
                     />
 
                     <div className="flex justify-end gap-4">
-                      <Button type="button" variant="outline" onClick={() => navigate('/dashboard')}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => navigate('/dashboard')}
+                      >
                         Cancel
                       </Button>
                       <Button type="submit" disabled={isSubmitting}>

@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Session } from '@supabase/supabase-js';
@@ -14,7 +13,12 @@ type AuthContextType = {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string, userType: UserType) => Promise<void>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+    userType: UserType
+  ) => Promise<void>;
   signOut: () => Promise<void>;
   googleSignIn: () => Promise<void>;
   githubSignIn: () => Promise<void>;
@@ -31,34 +35,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event);
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // Fetch user type from profiles
-          const { data } = await supabaseExtended
-            .from('profiles')
-            .select('user_type')
-            .eq('id', session.user.id)
-            .single();
-          
-          setUserType(data?.user_type as UserType || 'candidate');
-        } else {
-          setUserType(null);
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    // Then check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event);
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
         // Fetch user type from profiles
         const { data } = await supabaseExtended
@@ -66,10 +49,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           .select('user_type')
           .eq('id', session.user.id)
           .single();
-        
-        setUserType(data?.user_type as UserType || 'candidate');
+
+        setUserType((data?.user_type as UserType) || 'candidate');
+      } else {
+        setUserType(null);
       }
-      
+
+      setLoading(false);
+    });
+
+    // Then check for existing session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      if (session?.user) {
+        // Fetch user type from profiles
+        const { data } = await supabaseExtended
+          .from('profiles')
+          .select('user_type')
+          .eq('id', session.user.id)
+          .single();
+
+        setUserType((data?.user_type as UserType) || 'candidate');
+      }
+
       setLoading(false);
     });
 
@@ -79,7 +83,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       if (error) throw error;
       toast.success('Signed in successfully');
       navigate('/dashboard');
@@ -91,52 +98,94 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string, userType: UserType) => {
+  const createUserRecords = async (
+    userId: string,
+    fullName: string,
+    userType: UserType = 'candidate'
+  ) => {
+    try {
+      const { error: profileError } = await supabaseExtended
+        .from('profiles')
+        .upsert({
+          id: userId,
+          full_name: fullName,
+          user_type: userType,
+        });
+
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+        console.error(
+          'Profile error details:',
+          profileError.details,
+          profileError.hint
+        );
+        return false;
+      }
+
+      console.log('Profile created successfully');
+
+      const { error: userError } = await supabase.from('users').upsert({
+        id: userId,
+        full_name: fullName,
+      });
+
+      if (userError) {
+        console.error('Error creating user:', userError);
+        console.error(
+          'User error details:',
+          userError.details,
+          userError.hint,
+          userError.message
+        );
+
+        if (userError.code === '23505') {
+          console.log('User already exists, continuing...');
+          return true;
+        }
+
+        return false;
+      }
+
+      console.log('User created successfully');
+      return true;
+    } catch (error) {
+      console.error('Error creating user records:', error);
+      return false;
+    }
+  };
+
+  const signUp = async (
+    email: string,
+    password: string,
+    fullName: string,
+    userType: UserType
+  ) => {
     try {
       setLoading(true);
-      const { error, data } = await supabase.auth.signUp({ 
-        email, 
+      const { error, data } = await supabase.auth.signUp({
+        email,
         password,
         options: {
           data: {
             full_name: fullName,
-            user_type: userType
-          }
-        }
+            user_type: userType,
+          },
+        },
       });
-      
+
       if (error) throw error;
-      
-            // Create a user record in the users table
 
       if (data.user) {
-        // Create in user table (this is needed for foreign key constraints)
-                const { error: userError } = await supabase
-                    .from('users')
-                    .insert({
-                        id: data.user.id,
-                        full_name: fullName,
-                    });
-               
-        if (userError) {
-          console.error('Error creating user:', userError);
-        }
-        
-        // Create in profiles table
-        const { error: profileError } = await supabaseExtended
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            full_name: fullName,
-            user_type: userType
-          });
-          
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
+        const success = await createUserRecords(
+          data.user.id,
+          fullName,
+          userType
+        );
+        if (!success) {
           toast.error('Account created but profile setup failed');
         }
       }
-      
+
       toast.success('Signed up successfully! Try SignIn now.');
       navigate('/auth/login');
     } catch (error: any) {
@@ -168,7 +217,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
-        }
+        },
       });
       if (error) throw error;
     } catch (error: any) {
@@ -183,7 +232,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         provider: 'github',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
-        }
+        },
       });
       if (error) throw error;
     } catch (error: any) {
@@ -193,17 +242,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      userType,
-      session, 
-      loading, 
-      signIn, 
-      signUp, 
-      signOut, 
-      googleSignIn, 
-      githubSignIn 
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        userType,
+        session,
+        loading,
+        signIn,
+        signUp,
+        signOut,
+        googleSignIn,
+        githubSignIn,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
