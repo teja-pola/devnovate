@@ -5,10 +5,14 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
+    
     "baseUrl": ".",
     "paths": {
       "*": ["./src/*"]
     },
+    "module": "NodeNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
     "noImplicitAny": false,
     "noUnusedParameters": false,
     "skipLibCheck": true,

@@ -53,6 +53,71 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 221 83% 53%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
+
+    --radius: 0.75rem;
+  }
+
+  /* 🌙 Dark mode variables */
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 40% 13%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 40% 13%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 221 83% 60%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 222 40% 20%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 40% 20%;
+    --muted-foreground: 215 16% 60%;
+
+    --accent: 221 83% 60%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 70%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 32% 20%;
+    --input: 222 32% 20%;
+    --ring: 221 83% 60%;
+  }
+}
+
 
 @layer components {
   .glass-panel {
@@ -60,8 +125,9 @@
   }
   
   .glass-panel-dark {
-    @apply bg-black/5 backdrop-blur-lg border border-white/10 rounded-2xl shadow-sm;
+    @apply bg-gray-800 backdrop-blur-lg border border-gray-700 rounded-2xl shadow-sm; /* Updated for dark theme */
   }
+
   
   .section-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10; /* Updated padding */

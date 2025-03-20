@@ -1,5 +1,10 @@
 
 import { useState, useEffect } from 'react';
+import ThemeToggle from '@/components/ui/ThemeToggle'; // Import the ThemeToggle component
+
+import { Navbar } from '@/components/layout/Navbar'; // Corrected import statement
+
+
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,7 +12,7 @@ import * as z from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { Navbar } from '@/components/layout/Navbar';
+
 import { Footer } from '@/components/layout/Footer';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';

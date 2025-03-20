@@ -1,7 +1,10 @@
 
 import { useState, useEffect } from 'react';
+import ThemeToggle from '../ui/ThemeToggle'; // Import the ThemeToggle component
+
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
@@ -44,7 +47,7 @@ export const Navbar = () => {
       .toUpperCase();
   };
 
-  return (
+    return (
     <header className="bg-background border-b border-border/40">
       <div className="section-container py-4">
         <div className="flex items-center justify-between">
@@ -54,6 +57,10 @@ export const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
+          
+
+           {/* Add the ThemeToggle component here */}
+
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/events" className="text-foreground/80 hover:text-foreground transition-colors">
               Events
@@ -137,6 +144,7 @@ export const Navbar = () => {
                 </Button>
               </div>
             )}
+            <ThemeToggle />
           </nav>
 
           {/* Mobile menu button */}
@@ -208,5 +216,5 @@ export const Navbar = () => {
         )}
       </div>
     </header>
-  );
+    );
 };
