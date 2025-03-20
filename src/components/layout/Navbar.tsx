@@ -74,7 +74,7 @@ export const Navbar = () => {
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm">
                         <PlusCircle className="mr-2 h-4 w-4" />
-                        Create
+                        Host
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
