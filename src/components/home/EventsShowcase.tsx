@@ -64,7 +64,8 @@ export const EventsShowcase = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {events.map((event, index) => (
             <FadeIn key={event.id} delay={0.1 * index} direction="up">
-              <div className="glass-panel overflow-hidden group h-full flex flex-col">
+              <div className="bg-card overflow-hidden group h-full flex flex-col">
+
                 <div className="relative overflow-hidden">
                   <img 
                     src={event.image} 
@@ -78,19 +79,23 @@ export const EventsShowcase = () => {
                 
                 <div className="p-5 flex-1 flex flex-col">
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-lg font-semibold">{event.title}</h3>
+                    <h3 className="text-card-foreground text-lg font-semibold">{event.title}</h3>
+
                   </div>
                   
                   <div className="mb-4">
-                    <div className="text-sm text-muted-foreground mb-1">
+                    <div className="text-sm text-card-foreground mb-1">
+
                       {event.date} • {event.location}
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-card-foreground">
+
                       Organized by {event.organizer}
                     </div>
                   </div>
                   
-                  <div className="text-sm text-muted-foreground mb-4">
+                    <div className="text-sm text-card-foreground mb-4">
+
                     <span className="font-medium">{event.attendees.toLocaleString()}</span> attendees registered
                   </div>
                   
