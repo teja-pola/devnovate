@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
@@ -98,10 +97,10 @@ const JobsPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow">
-        <section className="py-16 md:py-24 bg-secondary/20">
-          <div className="section-container">
-            <FadeIn className="max-w-3xl">
+      <main className="flex-grow w-full items-center">
+      <section className="pt-5 pb-5 bg-secondary/20 flex items-center justify-center">
+      <div className="section-container text-center">
+      <FadeIn className="max-w-3xl mx-auto">
               <h1 className="text-4xl md:text-5xl font-bold mb-6">Find Your Next Opportunity</h1>
               <p className="text-lg text-muted-foreground mb-8">
                 Explore jobs and opportunities posted by companies looking for tech talent.
@@ -128,7 +127,7 @@ const JobsPage = () => {
           </div>
         </section>
         
-        <section className="py-16">
+        <section className="pt-5 pb-5 w-full flex items-center justify-center">
           <div className="section-container">
             <Tabs defaultValue="all" className="w-full">
               <TabsList className="mb-8">
@@ -136,6 +135,7 @@ const JobsPage = () => {
                 <TabsTrigger value="remote">Remote Jobs</TabsTrigger>
                 <TabsTrigger value="fulltime">Full-Time</TabsTrigger>
                 <TabsTrigger value="contract">Contract</TabsTrigger>
+                <TabsTrigger value="parttime">Part-Time</TabsTrigger>
               </TabsList>
               
               <TabsContent value="all">
@@ -161,6 +161,14 @@ const JobsPage = () => {
               <TabsContent value="contract">
                 {renderJobsList(
                   filteredJobs.filter(job => job.type.toLowerCase() === 'contract'),
+                  loading,
+                  navigate
+                )}
+              </TabsContent>
+
+              <TabsContent value="parttime">
+                {renderJobsList(
+                  filteredJobs.filter(job => job.type.toLowerCase() === 'part-time'),
                   loading,
                   navigate
                 )}

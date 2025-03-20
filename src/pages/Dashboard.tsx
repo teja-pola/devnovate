@@ -172,10 +172,11 @@ const Dashboard = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow">
-        <section className="py-16 md:py-24 bg-secondary/20">
+<section className="py-8 md:py-12 bg-secondary/20">
+
           <div className="section-container">
             <FadeIn className="max-w-3xl">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">Welcome, {user?.user_metadata?.full_name || 'User'}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold mb-6">Welcome, {user?.user_metadata?.full_name || 'User'}</h1>
               <p className="text-lg text-muted-foreground mb-8">
                 {userType === 'candidate' 
                   ? 'Manage your hackathons, teams, and projects all in one place.'
@@ -212,7 +213,7 @@ const Dashboard = () => {
           </div>
         </section>
         
-        <section className="py-16">
+        <section className="py-0">
           <div className="section-container">
             <h2 className="text-3xl font-bold mb-8">Dashboard</h2>
             

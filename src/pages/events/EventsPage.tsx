@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
@@ -89,18 +88,18 @@ const EventsPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col ">
       <Navbar />
-      <main className="flex-grow">
-        <section className="py-16 md:py-24 bg-secondary/20">
-          <div className="section-container">
-            <FadeIn className="max-w-3xl">
+      <main className="flex-grow w-full items-center">
+        <section className="py-0 md:py-0 bg-secondary/20">
+          <div className="section-container text-center">
+            <FadeIn className="max-w-3xl mx-auto">
               <h1 className="text-4xl md:text-5xl font-bold mb-6">Discover Events</h1>
               <p className="text-lg text-muted-foreground mb-8">
                 Explore hackathons, coding competitions, and tech events. Find your next challenge or showcase your skills.
               </p>
               {user && userType === 'candidate' && (
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap justify-center gap-4">
                   <Button onClick={() => navigate('/events/create')}>
                     <PlusCircle className="mr-2 h-4 w-4" /> Host Event
                   </Button>
@@ -118,10 +117,10 @@ const EventsPage = () => {
           </div>
         </section>
         
-        <section className="py-16">
-          <div className="section-container">
+        <section className="py-0">
+          <div className="section-container text-center">
             <Tabs defaultValue="live" className="w-full">
-              <TabsList className="mb-8">
+              <TabsList className="mb-8 justify-center">
                 <TabsTrigger value="live" className="flex items-center">
                   <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
                   Live Events ({liveEvents.length})
