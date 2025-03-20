@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { FadeIn } from '@/components/animations/FadeIn';
 import { Github, Mail } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { toast } from 'sonner';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
@@ -15,10 +16,17 @@ const Signup = () => {
   const [fullName, setFullName] = useState('');
   const [userType, setUserType] = useState<'candidate' | 'recruiter'>('candidate');
   const { signUp, googleSignIn, githubSignIn, loading } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signUp(email, password, fullName, userType);
+    try {
+      await signUp(email, password, fullName, userType);
+      toast.success('Account created! Please check your email for verification');
+      navigate('/auth/login');
+    } catch (error: any) {
+      toast.error(error.message || 'Error signing up');
+    }
   };
 
   return (
