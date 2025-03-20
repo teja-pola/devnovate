@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Briefcase, CalendarDays, Menu, PlusCircle, Users, X } from 'lucide-react';
+import { Logo } from '@/components/ui/Logo';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,8 +48,9 @@ export const Navbar = () => {
     <header className="bg-background border-b border-border/40">
       <div className="section-container py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="text-2xl font-bold">
-            Devnovate
+          <Link to="/" className="flex items-center space-x-2">
+            <Logo size="md" />
+            <span className="text-2xl font-bold">Devnovate</span>
           </Link>
 
           {/* Desktop Navigation */}

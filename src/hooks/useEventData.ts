@@ -31,26 +31,32 @@ export const useEventData = (userId?: string) => {
         if (hostedError) throw hostedError;
         setHostedEvents(createdEvents || []);
         
-        // Fetch events the user is participating in
-        const { data: registrations, error: regError } = await supabaseExtended
-          .from('event_registrations')
-          .select('event_id')
-          .eq('user_id', userId);
-          
-        if (regError) throw regError;
-        
-        if (registrations && registrations.length > 0) {
-          const eventIds = registrations.map(reg => reg.event_id);
-          
-          const { data: participatingEventData, error: eventsError } = await supabase
-            .from('events')
-            .select('*')
-            .in('id', eventIds)
-            .order('start_date', { ascending: true });
+        try {
+          // Fetch events the user is participating in
+          const { data: registrations, error: regError } = await supabaseExtended
+            .from('event_registrations')
+            .select('event_id')
+            .eq('user_id', userId);
             
-          if (eventsError) throw eventsError;
-          setParticipatingEvents(participatingEventData || []);
-        } else {
+          if (regError) throw regError;
+          
+          if (registrations && registrations.length > 0) {
+            const eventIds = registrations.map(reg => reg.event_id);
+            
+            const { data: participatingEventData, error: eventsError } = await supabase
+              .from('events')
+              .select('*')
+              .in('id', eventIds)
+              .order('start_date', { ascending: true });
+              
+            if (eventsError) throw eventsError;
+            setParticipatingEvents(participatingEventData || []);
+          } else {
+            setParticipatingEvents([]);
+          }
+        } catch (error) {
+          console.error('Error fetching registrations:', error);
+          // If the event_registrations table doesn't exist, we'll just show no participating events
           setParticipatingEvents([]);
         }
       } catch (error) {

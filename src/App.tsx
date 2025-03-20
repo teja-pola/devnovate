@@ -18,6 +18,8 @@ import EventDetails from "./pages/events/EventDetails";
 import JobsPage from "./pages/jobs/JobsPage";
 import CreateJob from "./pages/jobs/CreateJob";
 import CreateTeam from "./pages/teams/CreateTeam";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +53,10 @@ const App = () => (
             
             {/* Teams Routes */}
             <Route path="/teams/create" element={<CreateTeam />} />
+            
+            {/* Profile Routes */}
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

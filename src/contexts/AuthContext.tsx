@@ -107,8 +107,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (error) throw error;
       
-      // Create a profile record
+      // Create a profile record and an entry in users table
       if (data.user) {
+        // Create in user table (this is needed for foreign key constraints)
+        const { error: userError } = await supabase
+          .from('users')
+          .insert({
+            id: data.user.id,
+            full_name: fullName,
+          });
+          
+        if (userError) {
+          console.error('Error creating user:', userError);
+        }
+        
+        // Create in profiles table
         const { error: profileError } = await supabaseExtended
           .from('profiles')
           .insert({
