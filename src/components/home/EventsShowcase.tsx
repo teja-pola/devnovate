@@ -1,4 +1,3 @@
-
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/CustomButton';
@@ -10,7 +9,7 @@ const events = [
     title: 'Global AI Hackathon 2023',
     date: 'Dec 15-17, 2023',
     location: 'Virtual',
-    image: 'https://placehold.co/800x600/f8fafc/cbd5e1?text=AI+Hackathon',
+    image: '/001.jpg', // Updated path
     organizer: 'TechCorp',
     attendees: 1200,
     status: 'Upcoming'
@@ -20,7 +19,7 @@ const events = [
     title: 'Web3 Innovation Summit',
     date: 'Jan 10-12, 2024',
     location: 'New York, NY',
-    image: 'https://placehold.co/800x600/f8fafc/cbd5e1?text=Web3+Summit',
+    image: '/002.jpg', // Updated path
     organizer: 'Blockchain Foundation',
     attendees: 850,
     status: 'Registration Open'
@@ -30,7 +29,7 @@ const events = [
     title: 'Mobile Dev Challenge',
     date: 'Feb 5-7, 2024',
     location: 'Hybrid',
-    image: 'https://placehold.co/800x600/f8fafc/cbd5e1?text=Mobile+Challenge',
+    image: '/003.jpg', // Updated path
     organizer: 'App Alliance',
     attendees: 650,
     status: 'Coming Soon'
