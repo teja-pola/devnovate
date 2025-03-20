@@ -107,16 +107,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (error) throw error;
       
-      // Create a profile record and an entry in users table
+            // Create a user record in the users table
+
       if (data.user) {
         // Create in user table (this is needed for foreign key constraints)
-        const { error: userError } = await supabase
-          .from('users')
-          .insert({
-            id: data.user.id,
-            full_name: fullName,
-          });
-          
+                const { error: userError } = await supabase
+                    .from('users')
+                    .insert({
+                        id: data.user.id,
+                        full_name: fullName,
+                    });
+               
         if (userError) {
           console.error('Error creating user:', userError);
         }
@@ -136,7 +137,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
       
-      toast.success('Signed up successfully! Please check your email for verification.');
+      toast.success('Signed up successfully! Try SignIn now.');
       navigate('/auth/login');
     } catch (error: any) {
       toast.error(error.message || 'Error signing up');

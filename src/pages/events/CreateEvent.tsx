@@ -59,7 +59,9 @@ const CreateEvent = () => {
     }
   }, [user, loading, navigate]);
 
-  const onSubmit = async (values: FormValues) => {
+    const onSubmit = async (values: FormValues) => {
+        console.log('User ID:', user.id); // Log the user ID for debugging
+
     if (!user) {
       toast.error('You must be logged in to create an event');
       return;
