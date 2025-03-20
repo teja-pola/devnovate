@@ -59,12 +59,15 @@ export const Features = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <FadeIn key={index} delay={0.1 * index} direction="up">
-              <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 h-full border border-border/50">
+              <div className="bg-card rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 h-full border border-border/50">
+
                 <div className="mb-5 inline-flex items-center justify-center rounded-lg bg-primary/10 p-3">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
+                <h3 className="text-card-foreground text-xl font-semibold mb-3">{feature.title}</h3>
+
+                <p className="text-card-foreground">{feature.description}</p>
+
               </div>
             </FadeIn>
           ))}
