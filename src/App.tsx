@@ -13,6 +13,11 @@ import Signup from "./pages/auth/Signup";
 import AuthCallback from "./pages/auth/AuthCallback";
 import Dashboard from "./pages/Dashboard";
 import CreateEvent from "./pages/events/CreateEvent";
+import EventsPage from "./pages/events/EventsPage";
+import EventDetails from "./pages/events/EventDetails";
+import JobsPage from "./pages/jobs/JobsPage";
+import CreateJob from "./pages/jobs/CreateJob";
+import CreateTeam from "./pages/teams/CreateTeam";
 
 const queryClient = new QueryClient();
 
@@ -26,11 +31,27 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/features" element={<Features />} />
+            
+            {/* Auth Routes */}
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/signup" element={<Signup />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            
+            {/* Dashboard */}
             <Route path="/dashboard" element={<Dashboard />} />
+            
+            {/* Events Routes */}
+            <Route path="/events" element={<EventsPage />} />
             <Route path="/events/create" element={<CreateEvent />} />
+            <Route path="/events/:slug" element={<EventDetails />} />
+            
+            {/* Jobs Routes */}
+            <Route path="/jobs" element={<JobsPage />} />
+            <Route path="/jobs/create" element={<CreateJob />} />
+            
+            {/* Teams Routes */}
+            <Route path="/teams/create" element={<CreateTeam />} />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

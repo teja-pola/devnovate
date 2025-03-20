@@ -7,16 +7,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FadeIn } from '@/components/animations/FadeIn';
 import { Github, Mail } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [userType, setUserType] = useState<'candidate' | 'recruiter'>('candidate');
   const { signUp, googleSignIn, githubSignIn, loading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signUp(email, password, fullName);
+    await signUp(email, password, fullName, userType);
   };
 
   return (
@@ -91,6 +93,28 @@ const Signup = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+            </div>
+            <div className="space-y-2">
+              <Label>I am a:</Label>
+              <RadioGroup 
+                value={userType} 
+                onValueChange={(value) => setUserType(value as 'candidate' | 'recruiter')}
+                className="flex gap-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="candidate" id="candidate" />
+                  <Label htmlFor="candidate">Candidate</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="recruiter" id="recruiter" />
+                  <Label htmlFor="recruiter">Recruiter</Label>
+                </div>
+              </RadioGroup>
+              <p className="text-xs text-muted-foreground">
+                {userType === 'candidate' 
+                  ? 'Candidates can host or participate in events.' 
+                  : 'Recruiters can post jobs and hire candidates.'}
+              </p>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Creating account...' : 'Create account'}

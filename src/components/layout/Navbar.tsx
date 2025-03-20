@@ -1,5 +1,4 @@
 
-// This file is automatically updated to include login functionality
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -14,12 +13,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Menu, X } from 'lucide-react';
+import { Briefcase, CalendarDays, Menu, PlusCircle, Users, X } from 'lucide-react';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const isMobile = useIsMobile();
-  const { user, signOut } = useAuth();
+  const { user, userType, signOut } = useAuth();
   const navigate = useNavigate();
 
   // Close mobile menu when resizing to desktop
@@ -54,8 +53,12 @@ export const Navbar = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            <Link to="/features" className="text-foreground/80 hover:text-foreground transition-colors">
-              Features
+            <Link to="/events" className="text-foreground/80 hover:text-foreground transition-colors">
+              Events
+            </Link>
+            
+            <Link to="/jobs" className="text-foreground/80 hover:text-foreground transition-colors">
+              Jobs
             </Link>
             
             {user ? (
@@ -63,54 +66,65 @@ export const Navbar = () => {
                 <Link to="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">
                   Dashboard
                 </Link>
-                <Link to="/events" className="text-foreground/80 hover:text-foreground transition-colors">
-                  Events
-                </Link>
-                <Link to="/teams" className="text-foreground/80 hover:text-foreground transition-colors">
-                  Teams
-                </Link>
+                
+                {userType === 'candidate' && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Create
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => navigate('/events/create')}>
+                        <CalendarDays className="mr-2 h-4 w-4" />
+                        Host Event
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/teams/create')}>
+                        <Users className="mr-2 h-4 w-4" />
+                        Create Team
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+                
+                {userType === 'recruiter' && (
+                  <Button variant="outline" size="sm" onClick={() => navigate('/jobs/create')}>
+                    <Briefcase className="mr-2 h-4 w-4" />
+                    Post Job
+                  </Button>
+                )}
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Avatar className="cursor-pointer">
+                      <AvatarImage src={user.user_metadata?.avatar_url} />
+                      <AvatarFallback>
+                        {user.user_metadata?.full_name 
+                          ? getInitials(user.user_metadata.full_name) 
+                          : user.email?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                      Dashboard
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/profile')}>
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/settings')}>
+                      Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => signOut()}>
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
-            ) : (
-              <>
-                <Link to="/#features" className="text-foreground/80 hover:text-foreground transition-colors">
-                  How It Works
-                </Link>
-                <Link to="/#showcase" className="text-foreground/80 hover:text-foreground transition-colors">
-                  Showcase
-                </Link>
-              </>
-            )}
-            
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Avatar className="cursor-pointer">
-                    <AvatarImage src={user.user_metadata?.avatar_url} />
-                    <AvatarFallback>
-                      {user.user_metadata?.full_name 
-                        ? getInitials(user.user_metadata.full_name) 
-                        : user.email?.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
-                    Dashboard
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/profile')}>
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/settings')}>
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()}>
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             ) : (
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => navigate('/auth/login')}>
@@ -138,8 +152,12 @@ export const Navbar = () => {
         {isOpen && (
           <div className="md:hidden py-4">
             <div className="flex flex-col gap-4 items-center">
-              <Link to="/features" className="text-foreground/80 hover:text-foreground transition-colors">
-                Features
+              <Link to="/events" className="text-foreground/80 hover:text-foreground transition-colors">
+                Events
+              </Link>
+              
+              <Link to="/jobs" className="text-foreground/80 hover:text-foreground transition-colors">
+                Jobs
               </Link>
               
               {user ? (
@@ -147,33 +165,41 @@ export const Navbar = () => {
                   <Link to="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">
                     Dashboard
                   </Link>
-                  <Link to="/events" className="text-foreground/80 hover:text-foreground transition-colors">
-                    Events
+                  
+                  {userType === 'candidate' && (
+                    <>
+                      <Link to="/events/create" className="text-foreground/80 hover:text-foreground transition-colors">
+                        Host Event
+                      </Link>
+                      <Link to="/teams/create" className="text-foreground/80 hover:text-foreground transition-colors">
+                        Create Team
+                      </Link>
+                    </>
+                  )}
+                  
+                  {userType === 'recruiter' && (
+                    <Link to="/jobs/create" className="text-foreground/80 hover:text-foreground transition-colors">
+                      Post Job
+                    </Link>
+                  )}
+                  
+                  <Link to="/profile" className="text-foreground/80 hover:text-foreground transition-colors">
+                    Profile
                   </Link>
-                  <Link to="/teams" className="text-foreground/80 hover:text-foreground transition-colors">
-                    Teams
-                  </Link>
+                  
                   <Button variant="outline" onClick={() => signOut()} className="w-full">
                     Logout
                   </Button>
                 </>
               ) : (
-                <>
-                  <Link to="/#features" className="text-foreground/80 hover:text-foreground transition-colors">
-                    How It Works
-                  </Link>
-                  <Link to="/#showcase" className="text-foreground/80 hover:text-foreground transition-colors">
-                    Showcase
-                  </Link>
-                  <div className="flex gap-2 w-full">
-                    <Button variant="outline" onClick={() => navigate('/auth/login')} className="flex-1">
-                      Sign In
-                    </Button>
-                    <Button onClick={() => navigate('/auth/signup')} className="flex-1">
-                      Sign Up
-                    </Button>
-                  </div>
-                </>
+                <div className="flex gap-2 w-full">
+                  <Button variant="outline" onClick={() => navigate('/auth/login')} className="flex-1">
+                    Sign In
+                  </Button>
+                  <Button onClick={() => navigate('/auth/signup')} className="flex-1">
+                    Sign Up
+                  </Button>
+                </div>
               )}
             </div>
           </div>
